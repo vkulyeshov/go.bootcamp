@@ -59,10 +59,10 @@ func FetchRSS(url string) ([]data.RSSItem, error) {
 	}
 
 	// Convert xmlRSSItem to data.RSSItem
-	items := make([]data.RSSItem, 0)
+	items := make([]data.RSSItem, len(xmlData.Channel.Items))
 
-	for _, item := range xmlData.Channel.Items {
-		item := data.RSSItem{
+	for i, item := range xmlData.Channel.Items {
+		items[i] = data.RSSItem{
 			Title:       item.Title,
 			Link:        item.Link,
 			Description: item.Description,
@@ -71,7 +71,6 @@ func FetchRSS(url string) ([]data.RSSItem, error) {
 			PubDate:     item.PubDate,
 			GUID:        item.GUID,
 		}
-		items = append(items, item)
 	}
 	return items, nil
 }

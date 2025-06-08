@@ -19,7 +19,7 @@ func main() {
 	flag.Parse()
 
 	if *rssURL == "" && !*showDB && !*reset {
-		log.Fatal("Please specify either --url or --show-db or reset parameter")
+		log.Fatal("Please specify either --url or --show-db or --reset parameter")
 	}
 
 	dbConn, err := db.InitDB(*dbPath)
@@ -41,7 +41,7 @@ func main() {
 			log.Fatalf("Error fetching RSS: %v", err)
 		}
 
-		count := 0
+		var count int
 		for _, item := range items {
 			if *limit > 0 && count >= *limit {
 				break
@@ -52,9 +52,9 @@ func main() {
 
 			if err != nil {
 				log.Printf("Insert error: %v", err)
-			} else {
-				count++
+				continue
 			}
+			count++
 		}
 		log.Printf("Stored %d items to database", count)
 	}
@@ -69,7 +69,7 @@ func main() {
 		fmt.Println("ID | Title | Link")
 		fmt.Println(SPLIT_LINE)
 
-		count := 0
+		var count int
 		for _, item := range items {
 			fmt.Printf("%d | %s | %s\n", item.ID, item.Title, item.Link)
 			count++
