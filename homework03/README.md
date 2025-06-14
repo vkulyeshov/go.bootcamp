@@ -6,7 +6,7 @@ A simple CLI tool written in Go for fetching RSS feeds, storing them in an SQLit
 
 - Fetch RSS feed from a URL (`--url`)
 - Limit the number of items fetched from RSS resource (`--limit`)
-- Store feed items in a local SQLite database (`--db`) default `rss_items.db`
+- Store feed items to PostgreSQL database (`--db`) default `postgres://rss:rss@localhost:5432/rss`
 - Clear the database (`--reset`)
 - View entries from the database (`--show-db`)
 
@@ -21,7 +21,7 @@ go build -o rss-fetcher
 ## Run
 
 ```bash
-go run . <options>
+go run ./app <options>
 ```
 
 # List of available RSS resources as example for testing purpose

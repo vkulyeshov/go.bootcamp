@@ -4,15 +4,32 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"rss_fetcher/db"
 	"rss_fetcher/parser"
+
+	"github.com/joho/godotenv"
+	_ "github.com/joho/godotenv"
 )
 
 const SPLIT_LINE = "==========================================="
 
 func main() {
+	err := godotenv.Load("../.env")
+	if err != nil {
+		log.Fatal(".env file not found!")
+	}
+
+	defaultDBURL :=
+		fmt.Sprintf("postgres://%s:%v@%s:%s/%s",
+			os.Getenv("POSTGRES_USER"),
+			os.Getenv("POSTGRES_PASSWORD"),
+			os.Getenv("POSTGRES_HOST"),
+			os.Getenv("POSTGRES_PORT"),
+			os.Getenv("POSTGRES_DB"))
+
 	rssURL := flag.String("url", "", "RSS feed URL")
-	dbUrl := flag.String("db-url", "postgres://rss:rss@localhost:5432/rss", "URL to the database")
+	dbUrl := flag.String("db", defaultDBURL, "URL to Postgres database")
 	limit := flag.Int("limit", 0, "Max number of entries (0 = all)")
 	reset := flag.Bool("reset", false, "Clear table before inserting")
 	showDB := flag.Bool("show-db", false, "Show table contents")

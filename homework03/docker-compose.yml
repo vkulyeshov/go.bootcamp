@@ -6,7 +6,7 @@ services:
     ports:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     volumes:
-     - ~/work/yyy:/var/lib/postgresql/data
+      - ${POSTGRES_HOST_DB_PATH}:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'" ]
       interval: 1s
@@ -28,3 +28,16 @@ services:
         condition: service_healthy      
     volumes:
       - ./migrations:/migrations
+
+# for testing purpose only, should be removed
+# Check internal structure of the database
+  fix_permissions:
+    image: alpine
+    command: ["sh", "-c", "chmod -R 777 /var/lib/postgresql/data"]
+    volumes:
+      - ${POSTGRES_HOST_DB_PATH}:/var/lib/postgresql/data
+    entrypoint: "" 
+    restart: no
+    depends_on: 
+      database:
+        condition: service_healthy

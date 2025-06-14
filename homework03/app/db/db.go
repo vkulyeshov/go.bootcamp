@@ -9,26 +9,7 @@ import (
 )
 
 func InitDB(connectionUrl string) (*pgx.Conn, error) {
-	db, err := pgx.Connect(context.Background(), connectionUrl)
-	if err != nil {
-		return nil, err
-	}
-	createTable := `
-	CREATE TABLE IF NOT EXISTS items (
-		id SERIAL PRIMARY KEY,
-		title TEXT,
-		link TEXT,
-		description TEXT,
-		author TEXT,
-		category TEXT,
-		pub_date TEXT,	
-		guid TEXT	
-	);`
-	_, err = db.Exec(context.Background(), createTable)
-	if err != nil {
-		return nil, err
-	}
-	return db, nil
+	return pgx.Connect(context.Background(), connectionUrl)
 }
 
 func SaveItem(db *pgx.Conn, title, link, description, author, category, pub_date, guid string) error {
