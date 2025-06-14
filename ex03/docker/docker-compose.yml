@@ -1,0 +1,9 @@
+services:
+  postgres:
+    image: postgres:13.3
+    environment:
+      POSTGRES_DB: "rss"
+      POSTGRES_USER: "rss"
+      POSTGRES_PASSWORD: "rss"
+    ports:
+      - "5432:5432"
