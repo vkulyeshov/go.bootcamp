@@ -15,13 +15,13 @@ A simple CLI tool written in Go for fetching RSS feeds, storing them in an SQLit
 ## Build
 
 ```bash
-go build -o rss-fetcher
+go -C app build -o rss-fetcher
 ```
 
 ## Run
 
 ```bash
-go run ./app <options>
+go -C app run . <options>
 ```
 
 # List of available RSS resources as example for testing purpose
