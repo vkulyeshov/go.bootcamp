@@ -30,13 +30,13 @@ services:
       - ./migrations:/migrations
 
 # for testing purpose only, should be removed
-# Check internal structure of the database
+# Allows to look at and remove the database structure without additional permissions
   fix_permissions:
     image: alpine
+    restart: "no"
     command: ["sh", "-c", "chmod -R 777 /var/lib/postgresql/data"]
     volumes:
       - ${POSTGRES_HOST_DB_PATH}:/var/lib/postgresql/data
-    restart: "no"
     depends_on: 
       database:
         condition: service_healthy

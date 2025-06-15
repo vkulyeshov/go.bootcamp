@@ -18,7 +18,14 @@ A simple CLI tool written in Go for fetching RSS feeds, storing them in an Postg
 go -C app build -o rss-fetcher
 ```
 
-## Run
+## How to use
+
+Firstly run up postgres server 
+```bash
+docker compose up -d
+```
+
+Then run cli app:
 
 ```bash
 go -C app run . <options>
