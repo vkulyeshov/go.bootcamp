@@ -1,6 +1,6 @@
 # RSS Fetcher
 
-A simple CLI tool written in Go for fetching RSS feeds, storing them in an SQLite database, and viewing saved entries.
+A simple CLI tool written in Go for fetching RSS feeds, storing them in an PostgreSQL database, and viewing saved entries.
 
 ## Features
 
