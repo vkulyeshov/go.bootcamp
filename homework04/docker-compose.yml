@@ -1,0 +1,106 @@
+services:
+  #ollama:
+  #  image: ollama/ollama:latest
+  #  env_file:
+  #    - .env
+  #  ports:
+  #    - 11434:11434
+  #  #ports:
+  #  #  - "${OLLAMA_PORT}:${OLLAMA_PORT}"
+  #  volumes:
+  #    - ./ollama:/root/.ollama
+  #  #entrypoint: sh -c 'ollama serve & sleep 3; ollama pull llama3 && ollama pull mxbai-embed-large'
+  #  #    entrypoint: [ "sh", "-c", "ollama serve && ollama pull llama3" ]
+  #    command: ["echo llama3 mxbai-embed-large | xargs -n1 ollama pull"]
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    env_file:
+      - .env
+    ports:
+      - "${LLM_PORT}:${LLM_PORT}"
+    volumes:
+      - ./ollama:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all 
+              capabilities: [gpu]
+
+  database:
+    image: ankane/pgvector:latest
+    container_name: postgres
+    env_file:
+      - .env
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    volumes:
+      - ${POSTGRES_HOST_DB_PATH}:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'" ]
+      interval: 5s
+      timeout: 1s
+      retries: 5      
+
+  migrations:
+    image: ghcr.io/kukymbr/goose-docker:3.19.2
+    restart: "no"
+    network_mode: host
+    env_file:
+      - .env
+    environment:
+      - GOOSE_DRIVER=postgres
+      - GOOSE_DBSTRING=host=${POSTGRES_HOST}  port=${POSTGRES_PORT} user=${POSTGRES_USER} dbname=${POSTGRES_DB} password=${POSTGRES_PASSWORD} sslmode=disable
+      - GOOSE_VERBOSE=true
+    depends_on: 
+      database:
+        condition: service_healthy
+    volumes:
+      - ./migrations:/migrations
+
+  api-service:
+    build: .
+    container_name: api-service
+    restart: "no"
+    network_mode: host
+    ports:
+      - "8080:8080"
+    command: ./api-service      
+    depends_on: 
+      database:
+        condition: service_healthy
+
+  channel-service:
+    build: .
+    container_name: channel-service
+    restart: "no"
+    network_mode: host
+    command: ./channel-service      
+    depends_on: 
+      database:
+        condition: service_healthy
+
+  news-service:
+    build: .
+    container_name: news-service
+    restart: "no"
+    network_mode: host
+    command: ./news-service      
+    depends_on: 
+      database:
+        condition: service_healthy
+
+
+# for testing purpose only, should be removed
+# Allows to look at and remove the database structure without additional permissions
+  fix_permissions:
+    image: alpine
+    restart: "no"
+    command: ["sh", "-c", "chmod -R 777 /var/lib/postgresql/data"]
+    volumes:
+      - ${POSTGRES_HOST_DB_PATH}:/var/lib/postgresql/data
+    depends_on: 
+      database:
+        condition: service_healthy

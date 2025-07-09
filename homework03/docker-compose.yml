@@ -1,6 +1,6 @@
 services:
   database:
-    image: postgres
+    image: ankane/pgvector:latest
     env_file:
       - .env
     ports:
