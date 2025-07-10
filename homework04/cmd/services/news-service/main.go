@@ -8,9 +8,19 @@ import (
 	"time"
 )
 
+const (
+	defaultConnection       = "postgres://rss:rss@localhost:5432/rss"
+	ollamaDefaultConnection = "http://localhost:11434"
+	embDefaultModel         = "mxbai-embed-large"
+	genDefaultModel         = "llama3"
+)
+
 func main() {
-	defaultConnection := "postgres://rss:rss@localhost:5432/rss"
 	dbParams := flag.String("db", defaultConnection, "Postgres connection string")
+	ollamaConnection := flag.String("ollama", ollamaDefaultConnection, "Postgres connection string")
+	embModel := flag.String("emb", embDefaultModel, "Embedding model")
+	genModel := flag.String("gen", genDefaultModel, "Generative model")
+
 	flag.Parse()
 	dbConn, err := db.InitDB(*dbParams)
 	if err != nil {
@@ -24,7 +34,7 @@ func main() {
 	}
 	defer vectorDB.Close()
 
-	daemon := daemon.NewNewsDaemon(dbConn, vectorDB, "http://localhost:11434", "mxbai-embed-large", "llama3")
+	daemon := daemon.NewNewsDaemon(dbConn, vectorDB, *ollamaConnection, *embModel, *genModel)
 
 	ticker := time.NewTicker(1 * time.Minute)
 	defer ticker.Stop()

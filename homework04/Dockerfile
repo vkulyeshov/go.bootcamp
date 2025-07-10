@@ -30,6 +30,3 @@ WORKDIR /app
 COPY --from=builder /app/bin/api-service .
 COPY --from=builder /app/bin/channel-service .
 COPY --from=builder /app/bin/news-service .
-
-# Default command (override with docker run CMD)
-#CMD ["./api-service"]

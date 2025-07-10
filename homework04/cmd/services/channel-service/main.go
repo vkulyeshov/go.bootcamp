@@ -8,8 +8,11 @@ import (
 	"time"
 )
 
+const (
+	defaultConnection = "postgres://rss:rss@localhost:5432/rss"
+)
+
 func main() {
-	defaultConnection := "postgres://rss:rss@localhost:5432/rss"
 	dbParams := flag.String("db", defaultConnection, "Postgres connection string")
 	flag.Parse()
 	dbConn, err := db.InitDB(*dbParams)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"rss_fetcher/internal/db"
 	"rss_fetcher/internal/services/api"
@@ -10,14 +11,27 @@ import (
 )
 
 const (
+	defaultConnection       = "postgres://rss:rss@localhost:5432/rss"
+	ollamaDefaultConnection = "http://localhost:11434"
+	embDefaultModel         = "mxbai-embed-large"
+	genDefaultModel         = "llama3"
+	defaultApiPort          = 8080
+
 	rootPath     = "/api/v1"
 	channelsPath = rootPath + "/channels"
+	newsPath     = rootPath + "/news"
+	jobsPath     = rootPath + "/jobs"
+	queryPath    = rootPath + "/query"
 )
 
 func main() {
 
-	defaultConnection := "postgres://rss:rss@localhost:5432/rss"
 	dbParams := flag.String("db", defaultConnection, "Postgres connection string")
+	ollamaConnection := flag.String("ollama", ollamaDefaultConnection, "Postgres connection string")
+	embModel := flag.String("emb", embDefaultModel, "Embedding model")
+	genModel := flag.String("gen", genDefaultModel, "Generative model")
+	apiPort := flag.Int("port", defaultApiPort, "REST API port")
+
 	flag.Parse()
 	dbConn, err := db.InitDB(*dbParams)
 	if err != nil {
@@ -31,7 +45,7 @@ func main() {
 	}
 	defer vectorDB.Close()
 
-	api := api.New(dbConn, vectorDB, "http://localhost:11434", "mxbai-embed-large", "llama3")
+	api := api.New(dbConn, vectorDB, *ollamaConnection, *embModel, *genModel)
 
 	e := echo.New()
 
@@ -40,11 +54,33 @@ func main() {
 	e.GET(channelsPath+"/:id", api.GetChannel)
 	e.DELETE(channelsPath, api.DeleteChannels)
 	e.DELETE(channelsPath+"/:id", api.DeleteChannel)
-	e.GET(rootPath+"/news", api.GetAllNews)
-	e.DELETE(rootPath+"/news/:id", api.DeleteNews)
-	e.GET(rootPath+"/query/:q", api.GetQuery)
-	e.GET(rootPath+"/jobs", api.GetJobs)
+	e.GET(newsPath, api.GetAllNews)
+	e.DELETE(newsPath+"/:id", api.DeleteNews)
+	e.GET(queryPath+"/:q", api.GetQuery)
+	e.GET(jobsPath, api.GetJobs)
 
-	log.Println("Starting public service on :8080")
-	e.Logger.Fatal(e.Start(":8080"))
+	// graceful exit from service
+	//quitChannel := make(chan os.Signal, 1)
+	//signal.Notify(quitChannel, syscall.SIGINT, syscall.SIGTERM)
+
+	// Start the server in a goroutines
+	//go func() {
+	log.Printf("Starting REST API service on %d", *apiPort)
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", *apiPort)))
+	//}()
+
+	// Block until a signal is received
+	//<-quitChannel
+	//log.Println("Shutting down REST API service...")
+
+	// Create a context with a timeout for graceful shutdown
+	//ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	//defer cancel()
+
+	// Attempt graceful shutdown
+	//if err := e.Shutdown(ctx); err != nil {
+	//	log.Fatalf("REST API service shutdown error: %v", err)
+	//}
+
+	//log.Println("REST API service is stopped.")
 }

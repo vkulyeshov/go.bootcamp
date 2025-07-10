@@ -1,35 +1,34 @@
-# RSS Fetcher
+# RSS Rag system
 
-A simple CLI tool written in Go for fetching RSS feeds, storing them in an PostgreSQL database, and viewing saved entries.
-
-## Features
-
-- Fetch RSS feed from a URL (`--url`)
-- Limit the number of items fetched from RSS resource (`--limit`)
-- Store feed items to PostgreSQL database (`--db`) default `postgres://rss:rss@localhost:5432/rss`
-- Clear the database (`--reset`)
-- View entries from the database (`--show-db`)
-
----
-
-## Build
-
-```bash
-go -C app build -o rss-fetcher
-```
+A simple tool what fetching last neww based on RSS channels
+Then it makes analyse and store relevant information to Vector DB
+It allows to produce LLM answers based on last news
 
 ## How to use
 
-Firstly run up postgres server 
+Firstly run up services
 ```bash
-docker compose up -d
+docker compose up -d --build
 ```
 
-Then run cli app:
+Then run cli app can be run:
 
 ```bash
-go -C app run . <options>
+go -C app run ./cmd/cli/ <options>
 ```
+
+## Features
+
+- Add RSS channel to db (`--url`)
+- Clear the database (`--reset`)
+- View channels from the database (`--show-channels`)
+- View news from the database (`--show-news`)
+- View jobs from the database (`--show-jobs`)
+- Chat with LLM (`--query="query text"`)
+
+---
+
+
 
 # List of available RSS resources as example for testing purpose
 https://about.fb.com/wp-content/uploads/2016/05/rss-urls-1.pdf
